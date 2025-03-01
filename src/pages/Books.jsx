@@ -3,17 +3,17 @@ import { Container, Grid, Typography, Card, CardContent, CardMedia, Button, Box 
 const books = [
   {
     id: 1,
-    title: "The Path of Wisdom",
-    description: "A collection of poems exploring life's deepest truths",
-    image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400",
+    title: "Words of Wisdom",
+    description: "A Treasury of Muslim Poetry: A Classically-Styled Collection of Islamic Poems",
+    image: "https://m.media-amazon.com/images/I/61ihr+LWqhL._SL1294_.jpg",
     amazonLink: "https://amazon.com"
   },
   {
     id: 2,
-    title: "Virtuous Living",
-    description: "A guide to living a life of virtue and purpose",
-    image: "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=400",
-    amazonLink: "https://amazon.com"
+    title: "Poetry for the Rightfull Thinkers",
+    description: "Poetry for the Rightful Thinkers is a free verse poetry writing style written to restore moral rectitude",
+    image: "https://m.media-amazon.com/images/I/71+nT1N+HfL._SY466_.jpg",
+    amazonLink: "https://www.amazon.com/POETRY-RIGHTFUL-THINKERS-RASHEED-OLAYEMI/dp/B0C1JDQH6S"
   }
 ];
 

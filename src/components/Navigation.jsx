@@ -141,25 +141,10 @@ function Navigation() {
               src={logo}
               alt="Poetry of Virtue Logo"
               sx={{
-                height: { xs: '40px', md: '50px' },
+                height: { xs: '60px', md: '80px' },
                 width: 'auto'
               }}
             />
-            <Typography
-              variant="h6"
-              sx={{
-                color: 'primary.main',
-                fontWeight: 800,
-                fontSize: { xs: '1.3rem', md: '1.6rem' },
-                letterSpacing: '-0.02em',
-                background: 'linear-gradient(135deg, #4A90E2 0%, #74AAEB 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                fontStyle: 'italic'
-              }}
-            >
-              Poetry of Virtue
-            </Typography>
           </Box>
 
           {isMobile ? (

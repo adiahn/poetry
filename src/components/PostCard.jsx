@@ -10,12 +10,25 @@ function PostCard({ post, featured }) {
   const [comment, setComment] = useState('');
   const [showCommentForm, setShowCommentForm] = useState(false);
 
+  if (!post) {
+    return null;
+  }
+
   const handleSubmitComment = (e) => {
     e.preventDefault();
     addComment(post.id, { text: comment, author: 'Anonymous' });
     setComment('');
     setShowCommentForm(false);
   };
+
+  const formatDate = (date) => {
+    if (!date) return '';
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return isNaN(dateObj.getTime()) ? '' : format(dateObj, 'MMMM d, yyyy');
+  };
+
+  const comments = post.comments || [];
+  const likes = post.likes || 0;
 
   return (
     <Card sx={{ 
@@ -38,7 +51,7 @@ function PostCard({ post, featured }) {
       <CardContent sx={{ p: featured ? 4 : 3 }}>
         <Box sx={{ mb: 3 }}>
           <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-            {format(post.date, 'MMMM d, yyyy')}
+            {formatDate(post.date)}
           </Typography>
           <Typography 
             variant={featured ? 'h4' : 'h5'} 
@@ -76,20 +89,20 @@ function PostCard({ post, featured }) {
           borderColor: 'divider'
         }}>
           <Typography variant="caption" color="text.secondary">
-            {format(post.date, 'MMMM d, yyyy')}
+            {formatDate(post.date)}
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <IconButton 
                 onClick={() => likePost(post.id)}
-                color={post.likes > 0 ? 'secondary' : 'default'}
+                color={likes > 0 ? 'secondary' : 'default'}
                 size="small"
               >
                 <FavoriteIcon />
               </IconButton>
               <Typography variant="body2" sx={{ ml: 0.5 }}>
-                {post.likes}
+                {likes}
               </Typography>
             </Box>
 
@@ -102,18 +115,18 @@ function PostCard({ post, featured }) {
                 <ChatBubbleOutlineIcon />
               </IconButton>
               <Typography variant="body2" sx={{ ml: 0.5 }}>
-                {post.comments.length}
+                {comments.length}
               </Typography>
             </Box>
           </Box>
         </Box>
 
-        {post.comments.length > 0 && (
+        {comments.length > 0 && (
           <Box sx={{ mt: 3 }}>
             <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
               Comments
             </Typography>
-            {post.comments.map(comment => (
+            {comments.map(comment => (
               <Box key={comment.id} sx={{ mb: 3 }}>
                 <Box sx={{ 
                   mb: 2,
@@ -128,7 +141,7 @@ function PostCard({ post, featured }) {
                     {comment.text}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {format(comment.date, 'PPP')}
+                    {formatDate(comment.date)}
                   </Typography>
                 </Box>
 
@@ -151,7 +164,7 @@ function PostCard({ post, featured }) {
                       {reply.text}
                     </Typography>
                     <Typography variant="caption">
-                      {format(reply.date, 'PPP')}
+                      {formatDate(reply.date)}
                     </Typography>
                   </Box>
                 ))}

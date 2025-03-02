@@ -13,6 +13,7 @@ import { PostProvider } from './context/PostContext';
 import { AuthProvider } from './context/AuthContext';
 import About from './pages/About';
 import Author from './pages/Author';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const theme = createTheme({
   palette: {
@@ -131,26 +132,28 @@ function App() {
       <AuthProvider>
         <PostProvider>
           <BrowserRouter>
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              minHeight: '100vh',
-              bgcolor: 'background.default'
-            }}>
-              <Navigation />
-              <Box component="main" sx={{ flex: 1 }}>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/author" element={<Author />} />
-                  <Route path="/books" element={<Books />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/contact" element={<Contact />} />
-                </Routes>
+            <ErrorBoundary>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column',
+                minHeight: '100vh',
+                bgcolor: 'background.default'
+              }}>
+                <Navigation />
+                <Box component="main" sx={{ flex: 1 }}>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/author" element={<Author />} />
+                    <Route path="/books" element={<Books />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/contact" element={<Contact />} />
+                  </Routes>
+                </Box>
+                <Footer />
               </Box>
-              <Footer />
-            </Box>
+            </ErrorBoundary>
           </BrowserRouter>
         </PostProvider>
       </AuthProvider>

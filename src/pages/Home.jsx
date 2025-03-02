@@ -73,7 +73,7 @@ function Home() {
 
       <Grid container spacing={4}>
         {sortedPosts.map(post => (
-          <Grid item xs={12} key={post.id}>
+          <Grid item xs={12} key={post._id || post.id}>
             <PostCard post={post} />
           </Grid>
         ))}

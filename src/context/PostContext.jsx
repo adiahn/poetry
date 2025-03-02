@@ -39,7 +39,14 @@ export function PostProvider({ children }) {
         throw new Error(data.message || 'Failed to create post');
       }
 
-      setPosts(prevPosts => [...prevPosts, data.data]);
+      const newPost = {
+        ...data.data,
+        date: new Date(data.data.createdAt || Date.now()),
+        comments: [],
+        likes: 0
+      };
+
+      setPosts(prevPosts => [...prevPosts, newPost]);
       return { success: true };
     } catch (err) {
       setError(err.message || 'Error creating post');

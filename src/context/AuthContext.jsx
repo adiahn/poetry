@@ -6,15 +6,31 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
 
-  const login = (username, password) => {
-    // Simple authentication for demo purposes
-    if (username === 'admin' && password === 'admin123') {
+  const login = async (email, password) => {
+    try {
+      const response = await fetch('http://localhost:4000/api/v1/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include', // This is important if your API uses cookies
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || 'Login failed');
+        return false;
+      }
+
       setIsAuthenticated(true);
       setError('');
       return true;
+    } catch (err) {
+      setError('Network error. Please try again.');
+      return false;
     }
-    setError('Invalid credentials');
-    return false;
   };
 
   const logout = () => {

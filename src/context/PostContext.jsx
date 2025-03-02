@@ -1,26 +1,11 @@
 import { createContext, useContext, useState } from 'react';
 
 const PostContext = createContext();
+const API_URL = import.meta.env.VITE_API_URL;
 
 export function PostProvider({ children }) {
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      title: 'The Path of Virtue',
-      content: 'Through winding roads of life we tread\nGuided by the light of virtue ahead\nEach step we take, each choice we make\nShapes the path that we partake',
-      likes: 5,
-      comments: [
-        { 
-          id: 1, 
-          text: 'Beautiful message!', 
-          author: 'John', 
-          date: new Date('2024-02-20'),
-          replies: [] 
-        }
-      ],
-      date: new Date('2024-02-20')
-    }
-  ]);
+  const [posts, setPosts] = useState([]);
+  const [error, setError] = useState(null);
 
   const [messages, setMessages] = useState([
     {
@@ -34,14 +19,50 @@ export function PostProvider({ children }) {
     }
   ]);
 
-  const addPost = (post) => {
-    setPosts([...posts, { 
-      ...post, 
-      id: posts.length + 1, 
-      likes: 0, 
-      comments: [], 
-      date: new Date() 
-    }]);
+  const addPost = async (post) => {
+    try {
+      const response = await fetch('http://localhost:4000/api/v1/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          title: post.title,
+          content: post.content
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create post');
+      }
+
+      setPosts(prevPosts => [...prevPosts, data.data]);
+      return { success: true };
+    } catch (err) {
+      setError(err.message || 'Error creating post');
+      return { success: false, error: err.message || 'Failed to create post' };
+    }
+  };
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch(`${API_URL}/posts`, {
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch posts');
+      }
+
+      setPosts(data.data);
+    } catch (err) {
+      setError(err.message || 'Error fetching posts');
+    }
   };
 
   const likePost = (postId) => {
@@ -114,8 +135,10 @@ export function PostProvider({ children }) {
 
   return (
     <PostContext.Provider value={{ 
-      posts, 
+    posts, 
       addPost, 
+      fetchPosts,
+      error,
       likePost, 
       addComment,
       addCommentReply,
@@ -129,4 +152,6 @@ export function PostProvider({ children }) {
   );
 }
 
-export const usePosts = () => useContext(PostContext);
+export function usePosts() {
+  return useContext(PostContext);
+}

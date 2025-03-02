@@ -4,7 +4,7 @@ import {
   Container, Typography, Box, TextField, Button, FormControl, 
   InputLabel, Select, MenuItem, Tabs, Tab, Badge, Divider,
   List, ListItem, ListItemText, ListItemAvatar, Avatar,
-  IconButton, Paper
+  IconButton, Paper, Alert
 } from '@mui/material';
 import { TabPanel, TabContext } from '@mui/lab';
 import { format } from 'date-fns';
@@ -16,15 +16,16 @@ import { usePosts } from '../context/PostContext';
 import { useAuth } from '../context/AuthContext';
 
 function Admin() {
-  const { addPost, posts, messages, markMessageAsRead, addCommentReply, addMessageReply } = usePosts();
+  const { addPost, posts, messages, markMessageAsRead, addCommentReply, addMessageReply, fetchPosts, error: postError } = usePosts();
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState('1');
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
-    content: '',
-    type: 'poem'
+    content: ''
   });
+  const [submitStatus, setSubmitStatus] = useState({ success: false, error: null });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -32,11 +33,37 @@ function Admin() {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addPost(formData);
-    setFormData({ title: '', content: '', type: 'poem' });
-    setTab('1');
+    setIsLoading(true);
+    setSubmitStatus({ success: false, error: null });
+
+    try {
+      if (!formData.title.trim() || !formData.content.trim()) {
+        throw new Error('Please provide both title and content');
+      }
+
+      const result = await addPost({
+        title: formData.title.trim(),
+        content: formData.content.trim()
+      });
+      
+      if (result.success) {
+        setFormData({ title: '', content: '' });
+        setSubmitStatus({ success: true, error: null });
+      } else {
+        setSubmitStatus({ success: false, error: result.error || 'Failed to create post' });
+      }
+    } catch (err) {
+      console.error('Error in handleSubmit:', err);
+      setSubmitStatus({ success: false, error: err.message || 'Failed to create post' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogout = () => {
@@ -142,22 +169,22 @@ function Admin() {
 
         <TabPanel value="2">
           <List>
-            {posts.flatMap(post => 
-              post.comments.map(comment => (
-                <Paper key={`${post.id}-${comment.id}`} sx={{ mb: 2, p: 2 }}>
+            {posts.map(post => 
+              (post.comments || []).map(comment => (
+                <Paper key={`${post._id}-${comment._id}`} sx={{ mb: 2, p: 2 }}>
                   <Typography variant="subtitle1" color="primary">
                     Re: {post.title}
                   </Typography>
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body1">{comment.text}</Typography>
+                    <Typography variant="body1">{comment.body}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      By {comment.author} on {format(comment.date, 'PPP')}
+                      By {comment.author || 'Anonymous'} on {format(new Date(comment.createdAt), 'PPP')}
                     </Typography>
                   </Box>
 
                   {comment.replies?.map((reply) => (
                     <Box 
-                      key={reply.id} 
+                      key={reply._id} 
                       sx={{ 
                         ml: 2, 
                         p: 1.5, 
@@ -170,7 +197,7 @@ function Admin() {
                       <Typography variant="subtitle2">Admin Reply:</Typography>
                       <Typography>{reply.text}</Typography>
                       <Typography variant="caption">
-                        {format(reply.date, 'PPP')}
+                        {format(new Date(reply.createdAt), 'PPP')}
                       </Typography>
                     </Box>
                   ))}
@@ -178,7 +205,7 @@ function Admin() {
                   <Box component="form" onSubmit={(e) => {
                     e.preventDefault();
                     const formData = new FormData(e.target);
-                    handleCommentReply(post.id, comment.id, formData.get('reply'));
+                    handleCommentReply(post._id, comment._id, formData.get('reply'));
                     e.target.reset();
                   }}>
                     <TextField
@@ -199,6 +226,18 @@ function Admin() {
         </TabPanel>
 
         <TabPanel value="3">
+          {submitStatus.success && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Post created successfully!
+            </Alert>
+          )}
+
+          {submitStatus.error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {submitStatus.error}
+            </Alert>
+          )}
+
           <Box component="form" onSubmit={handleSubmit} sx={{ 
             maxWidth: 600, 
             mx: 'auto',
@@ -214,6 +253,7 @@ function Admin() {
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               sx={{ mb: 3 }}
               required
+              disabled={isLoading}
             />
 
             <TextField
@@ -226,6 +266,7 @@ function Admin() {
               sx={{ mb: 3 }}
               required
               helperText="Use line breaks to format your content"
+              disabled={isLoading}
             />
 
             <Button 
@@ -234,8 +275,10 @@ function Admin() {
               color="primary" 
               fullWidth
               size="large"
+              sx={{ mt: 3 }}
+              disabled={isLoading}
             >
-              Publish Post
+              {isLoading ? 'Creating Post...' : 'Create Post'}
             </Button>
           </Box>
         </TabPanel>

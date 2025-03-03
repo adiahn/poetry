@@ -14,6 +14,7 @@ import { AuthProvider } from './context/AuthContext';
 import About from './pages/About';
 import Author from './pages/Author';
 import ErrorBoundary from './components/ErrorBoundary';
+import Posts from './pages/Posts';
 
 const theme = createTheme({
   palette: {
@@ -142,7 +143,7 @@ function App() {
                 <Navigation />
                 <Box component="main" sx={{ flex: 1 }}>
                   <Routes>
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<Posts />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/author" element={<Author />} />
                     <Route path="/books" element={<Books />} />

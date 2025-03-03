@@ -78,18 +78,44 @@ export function PostProvider({ children }) {
     ));
   };
 
-  const addComment = (postId, comment) => {
-    setPosts(posts.map(post => 
-      post.id === postId ? {
-        ...post,
-        comments: [...post.comments, { 
-          id: post.comments.length + 1, 
-          ...comment,
-          date: new Date(),
-          replies: []
-        }]
-      } : post
-    ));
+  const addComment = async (postId, comment) => {
+    try {
+      const response = await fetch(`${API_URL}/posts/${postId}/comment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          body: comment.text
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to add comment');
+      }
+
+      setPosts(posts.map(post => 
+        post._id === postId ? {
+          ...post,
+          comments: [...(post.comments || []), {
+            _id: data.data._id,
+            body: comment.text,
+            author: comment.author,
+            createdAt: new Date(),
+            replies: []
+          }]
+        } : post
+      ));
+
+      return { success: true };
+    } catch (err) {
+      console.error('Error adding comment:', err);
+      setError(err.message || 'Error adding comment');
+      return { success: false, error: err.message };
+    }
   };
 
   const addCommentReply = (postId, commentId, reply) => {

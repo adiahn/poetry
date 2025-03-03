@@ -14,11 +14,20 @@ function PostCard({ post, featured }) {
     return null;
   }
 
-  const handleSubmitComment = (e) => {
+  const handleSubmitComment = async (e) => {
     e.preventDefault();
-    addComment(post.id, { text: comment, author: 'Anonymous' });
-    setComment('');
-    setShowCommentForm(false);
+    
+    const result = await addComment(post._id, { 
+      text: comment, 
+      author: 'Anonymous' 
+    });
+
+    if (result.success) {
+      setComment('');
+      setShowCommentForm(false);
+    } else {
+      console.error('Failed to add comment:', result.error);
+    }
   };
 
   const formatDate = (date) => {
@@ -127,7 +136,7 @@ function PostCard({ post, featured }) {
               Comments
             </Typography>
             {comments.map(comment => (
-              <Box key={comment.id} sx={{ mb: 3 }}>
+              <Box key={comment._id} sx={{ mb: 3 }}>
                 <Box sx={{ 
                   mb: 2,
                   p: 2,
@@ -135,13 +144,13 @@ function PostCard({ post, featured }) {
                   borderRadius: 1
                 }}>
                   <Typography variant="subtitle2" color="primary">
-                    {comment.author}
+                    {comment.author || 'Anonymous'}
                   </Typography>
                   <Typography variant="body2">
-                    {comment.text}
+                    {comment.body}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {formatDate(comment.date)}
+                    {formatDate(comment.createdAt)}
                   </Typography>
                 </Box>
 

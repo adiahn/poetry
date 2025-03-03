@@ -4,13 +4,14 @@ import { Container, Box, TextField, Button, Typography, Alert } from '@mui/mater
 import { useAuth } from '../context/AuthContext';
 
 function Login() {
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
   const { login, error } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (login(credentials.username, credentials.password)) {
+    const success = await login(credentials.email, credentials.password);
+    if (success) {
       navigate('/admin');
     }
   };
@@ -40,9 +41,10 @@ function Login() {
             margin="normal"
             required
             fullWidth
-            label="Username"
-            value={credentials.username}
-            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+            label="Email"
+            type="email"
+            value={credentials.email}
+            onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
           />
           <TextField
             margin="normal"

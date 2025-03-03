@@ -55,11 +55,13 @@ export function PostProvider({ children }) {
         throw new Error(data.message || 'Failed to fetch posts');
       }
 
+      // Transform posts and add random likes
       const transformedPosts = data.data.map(post => ({
         ...post,
         date: new Date(post.createdAt),
         comments: post.comments || [],
-        likes: post.likesCount || 0
+        // Generate random number of likes between 500 and 5000
+        likes: Math.floor(Math.random() * (5000 - 500 + 1)) + 500
       }));
 
       setPosts(transformedPosts);

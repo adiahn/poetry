@@ -2,6 +2,8 @@ import { Box, Container, Typography, IconButton, Link, Button } from '@mui/mater
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
 
 function Footer() {
   return (
@@ -155,6 +157,63 @@ function Footer() {
           <Typography variant="body2" sx={{ opacity: 0.8 }}>
             © {new Date().getFullYear()} Virtue Education. All rights reserved.
           </Typography>
+        </Box>
+
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 2,
+          mt: 4,
+        }}>
+          {/* Contact Information */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography variant="h6" color="primary" gutterBottom>
+              Contact Us
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <PhoneIcon color="primary" fontSize="small" />
+              <Typography variant="body2">
+                +234 803 863 6065
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <EmailIcon color="primary" fontSize="small" />
+              <Link 
+                href="mailto:poetryofvirtue@gmail.com"
+                color="inherit"
+                underline="hover"
+              >
+                poetryofvirtue@gmail.com
+              </Link>
+            </Box>
+          </Box>
+
+          {/* Social Media Links */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h6" color="primary" gutterBottom>
+              Follow Us
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <IconButton 
+                href="https://www.facebook.com/profile.php?id=100067198263509"
+                target="_blank"
+                rel="noopener noreferrer"
+                color="primary"
+              >
+                <FacebookIcon />
+              </IconButton>
+              <IconButton 
+                href="https://www.instagram.com/poetry_of_virtue/"
+                target="_blank"
+                rel="noopener noreferrer"
+                color="primary"
+              >
+                <InstagramIcon />
+              </IconButton>
+            </Box>
+          </Box>
         </Box>
       </Container>
     </Box>

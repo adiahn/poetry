@@ -10,13 +10,20 @@ function Contact() {
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addMessage(formData);
-    setFormData({ name: '', email: '', message: '' });
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    const result = await addMessage(formData);
+    
+    if (result.success) {
+      setFormData({ name: '', email: '', message: '' });
+      setSubmitted(true);
+      setError('');
+      setTimeout(() => setSubmitted(false), 5000);
+    } else {
+      setError(result.error || 'Failed to send message');
+    }
   };
 
   return (
@@ -34,6 +41,12 @@ function Contact() {
       {submitted && (
         <Alert severity="success" sx={{ mb: 3 }}>
           Your message has been sent successfully!
+        </Alert>
+      )}
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
         </Alert>
       )}
 

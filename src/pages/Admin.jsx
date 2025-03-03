@@ -15,8 +15,14 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { usePosts } from '../context/PostContext';
 import { useAuth } from '../context/AuthContext';
 
+function formatDate(date) {
+  if (!date) return '';
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return isNaN(dateObj.getTime()) ? '' : format(dateObj, 'PPP');
+}
+
 function Admin() {
-  const { addPost, posts, messages, markMessageAsRead, addCommentReply, addMessageReply, fetchPosts, error: postError } = usePosts();
+  const { addPost, posts, messages, markMessageAsRead, addCommentReply, addMessageReply, fetchPosts, error: postError, fetchMessages } = usePosts();
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState('1');
@@ -34,8 +40,11 @@ function Admin() {
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
-    fetchPosts();
-  }, []);
+    if (isAuthenticated) {
+      fetchPosts();
+      fetchMessages();
+    }
+  }, [isAuthenticated]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,7 +122,7 @@ function Admin() {
         <TabPanel value="1">
           <List>
             {messages.map((message) => (
-              <Paper key={message.id} sx={{ mb: 2, p: 2 }}>
+              <Paper key={message._id || message.id} sx={{ mb: 2, p: 2 }}>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="h6">{message.name}</Typography>
                   <Typography variant="subtitle2" color="text.secondary">
@@ -121,13 +130,13 @@ function Admin() {
                   </Typography>
                   <Typography sx={{ mt: 1 }}>{message.message}</Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {format(message.date, 'PPP')}
+                    {formatDate(message.date)}
                   </Typography>
                 </Box>
 
-                {message.replies?.map((reply) => (
+                {(message.replies || []).map((reply) => (
                   <Box 
-                    key={reply.id} 
+                    key={reply._id || reply.id} 
                     sx={{ 
                       ml: 2, 
                       p: 1.5, 
@@ -140,7 +149,7 @@ function Admin() {
                     <Typography variant="subtitle2">Admin Reply:</Typography>
                     <Typography>{reply.text}</Typography>
                     <Typography variant="caption">
-                      {format(reply.date, 'PPP')}
+                      {formatDate(reply.date)}
                     </Typography>
                   </Box>
                 ))}
@@ -178,7 +187,7 @@ function Admin() {
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body1">{comment.body}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      By {comment.author || 'Anonymous'} on {format(new Date(comment.createdAt), 'PPP')}
+                      By {comment.author || 'Anonymous'} on {formatDate(comment.createdAt)}
                     </Typography>
                   </Box>
 
@@ -197,7 +206,7 @@ function Admin() {
                       <Typography variant="subtitle2">Admin Reply:</Typography>
                       <Typography>{reply.text}</Typography>
                       <Typography variant="caption">
-                        {format(new Date(reply.createdAt), 'PPP')}
+                        {formatDate(reply.createdAt)}
                       </Typography>
                     </Box>
                   ))}

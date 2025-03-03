@@ -8,6 +8,16 @@ function Posts() {
 
   useEffect(() => {
     fetchPosts();
+
+    // Optional: Fetch posts when the window regains focus
+    const handleFocus = () => {
+      fetchPosts();
+    };
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   if (error) {

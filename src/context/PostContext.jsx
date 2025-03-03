@@ -6,22 +6,11 @@ const API_URL = import.meta.env.VITE_API_URL;
 export function PostProvider({ children }) {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
-
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      message: 'Your poems have truly inspired me. Would love to collaborate!',
-      date: new Date('2024-02-20'),
-      read: false,
-      replies: []
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
 
   const addPost = async (post) => {
     try {
-      const response = await fetch('http://localhost:4000/api/v1/posts', {
+      const response = await fetch(`${API_URL}/posts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,7 +35,7 @@ export function PostProvider({ children }) {
         likes: 0
       };
 
-      setPosts(prevPosts => [...prevPosts, newPost]);
+      setPosts(prevPosts => [newPost, ...prevPosts]);
       return { success: true };
     } catch (err) {
       setError(err.message || 'Error creating post');
@@ -66,7 +55,14 @@ export function PostProvider({ children }) {
         throw new Error(data.message || 'Failed to fetch posts');
       }
 
-      setPosts(data.data);
+      const transformedPosts = data.data.map(post => ({
+        ...post,
+        date: new Date(post.createdAt),
+        comments: post.comments || [],
+        likes: post.likesCount || 0
+      }));
+
+      setPosts(transformedPosts);
     } catch (err) {
       setError(err.message || 'Error fetching posts');
     }
@@ -100,13 +96,7 @@ export function PostProvider({ children }) {
       setPosts(posts.map(post => 
         post._id === postId ? {
           ...post,
-          comments: [...(post.comments || []), {
-            _id: data.data._id,
-            body: comment.text,
-            author: comment.author,
-            createdAt: new Date(),
-            replies: []
-          }]
+          comments: [data.data, ...(post.comments || [])]
         } : post
       ));
 
@@ -137,33 +127,63 @@ export function PostProvider({ children }) {
     ));
   };
 
-  const addMessage = (message) => {
-    setMessages([...messages, { 
-      id: messages.length + 1, 
-      ...message, 
-      date: new Date(),
-      read: false 
-    }]);
+  const addMessage = async (message) => {
+    try {
+      const response = await fetch(`${API_URL}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: message.name,
+          email: message.email,
+          message: message.message
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send message');
+      }
+
+      setMessages(prevMessages => [data.data, ...prevMessages]);
+      return { success: true };
+    } catch (err) {
+      console.error('Error sending message:', err);
+      setError(err.message || 'Error sending message');
+      return { success: false, error: err.message };
+    }
   };
 
-  const addMessageReply = (messageId, reply) => {
-    setMessages(messages.map(message =>
-      message.id === messageId ? {
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch(`${API_URL}/messages`, {
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch messages');
+      }
+
+      // Transform the messages to ensure dates are properly formatted
+      const transformedMessages = data.data.map(message => ({
         ...message,
-        replies: [...(message.replies || []), {
-          id: (message.replies?.length || 0) + 1,
-          text: reply,
-          date: new Date(),
-          isAdmin: true
-        }]
-      } : message
-    ));
-  };
+        date: new Date(message.createdAt || message.date),
+        replies: (message.replies || []).map(reply => ({
+          ...reply,
+          date: new Date(reply.createdAt || reply.date)
+        }))
+      }));
 
-  const markMessageAsRead = (messageId) => {
-    setMessages(messages.map(message =>
-      message.id === messageId ? { ...message, read: true } : message
-    ));
+      setMessages(transformedMessages);
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+      setError(err.message || 'Error fetching messages');
+    }
   };
 
   return (
@@ -177,8 +197,7 @@ export function PostProvider({ children }) {
       addCommentReply,
       messages,
       addMessage,
-      addMessageReply,
-      markMessageAsRead
+      fetchMessages
     }}>
       {children}
     </PostContext.Provider>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, Typography, IconButton, Box, TextField, Button, Chip } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
@@ -6,9 +6,16 @@ import { format } from 'date-fns';
 import { usePosts } from '../context/PostContext';
 
 function PostCard({ post, featured }) {
-  const { likePost, addComment } = usePosts();
+  const { likePost, addComment, fetchPostComments } = usePosts();
   const [comment, setComment] = useState('');
   const [showCommentForm, setShowCommentForm] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (expanded && (!post.comments || post.comments.length === 0)) {
+      fetchPostComments(post._id);
+    }
+  }, [expanded, post._id]);
 
   if (!post) {
     return null;

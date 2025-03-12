@@ -188,6 +188,37 @@ export function PostProvider({ children }) {
     }
   };
 
+  const fetchPostComments = async (postId) => {
+    try {
+      const response = await fetch(`${API_URL}/posts/${postId}/comments`, {
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch comments');
+      }
+
+      // Update the specific post with its comments
+      setPosts(posts.map(post => 
+        post._id === postId ? {
+          ...post,
+          comments: data.data.map(comment => ({
+            ...comment,
+            createdAt: new Date(comment.createdAt)
+          }))
+        } : post
+      ));
+
+      return data.data;
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+      setError(err.message || 'Error fetching comments');
+      return [];
+    }
+  };
+
   return (
     <PostContext.Provider value={{ 
     posts, 
@@ -197,6 +228,7 @@ export function PostProvider({ children }) {
       likePost, 
       addComment,
       addCommentReply,
+      fetchPostComments,
       messages,
       addMessage,
       fetchMessages

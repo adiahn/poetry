@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:4000/api/v1/users/login', {
+      const response = await fetch('https://virtuebackend-1.onrender.com/api/v1/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
